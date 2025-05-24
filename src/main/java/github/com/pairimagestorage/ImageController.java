@@ -10,14 +10,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/")
 public class ImageController {
 
-    private final ImageService imageService;
+    private final ImageSender imageSender;
 
-    public ImageController(ImageService imageService) {
-        this.imageService = imageService;
+    public ImageController(ImageSender imageSender) {
+        this.imageSender = imageSender;
     }
 
-    @PostMapping(value = "/get_image")
+    @PostMapping("/send_image")
     public void getImage(@RequestParam("image") MultipartFile image) {
-        imageService.sendImage(image);
+        imageSender.sendRequest(image);
     }
 }
