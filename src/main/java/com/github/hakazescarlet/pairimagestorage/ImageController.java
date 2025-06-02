@@ -1,4 +1,4 @@
-package github.com.pairimagestorage;
+package com.github.hakazescarlet.pairimagestorage;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,14 +10,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/")
 public class ImageController {
 
-    private final ImageSender imageSender;
+    private final ImageHttpRequestSender imageHttpRequestSender;
 
-    public ImageController(ImageSender imageSender) {
-        this.imageSender = imageSender;
+    public ImageController(ImageHttpRequestSender imageHttpRequestSender) {
+        this.imageHttpRequestSender = imageHttpRequestSender;
     }
 
     @PostMapping("/send_image")
     public void getImage(@RequestParam("image") MultipartFile image) {
-        imageSender.sendRequest(image);
+        imageHttpRequestSender.send(image);
     }
 }

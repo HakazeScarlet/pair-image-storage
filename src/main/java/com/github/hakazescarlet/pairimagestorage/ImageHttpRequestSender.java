@@ -1,4 +1,4 @@
-package github.com.pairimagestorage;
+package com.github.hakazescarlet.pairimagestorage;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,15 +14,15 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 @Component
-public class ImageSender {
+public class ImageHttpRequestSender {
 
     private final HttpClient httpClient;
 
-    public ImageSender(HttpClient httpClient) {
+    public ImageHttpRequestSender(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
-    public void sendRequest(MultipartFile image) {
+    public void send(MultipartFile image) {
         Path path = Paths.get("temp");
         if (Files.notExists(path)) {
             try {
@@ -48,7 +48,7 @@ public class ImageSender {
                         .POST(HttpRequest.BodyPublishers.ofFile(tempDir))
                         .build();
 
-                httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+                httpClient.send(request, HttpResponse.BodyHandlers.ofFile(tempDir));
             } catch (IOException e) {
                 throw new IOResourceException("Unable to extract data from response or send request to server", e);
             } catch (InterruptedException e) {

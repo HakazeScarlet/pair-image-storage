@@ -1,4 +1,4 @@
-package github.com.pairimagestorage.configuration;
+package com.github.hakazescarlet.pairimagestorage.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
