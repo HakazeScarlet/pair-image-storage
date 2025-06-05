@@ -1,7 +1,5 @@
 package com.github.hakazescarlet.pairimagestorage;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -79,6 +77,7 @@ public class HTTPRequestMultipartBody {
             public Object getContent() {
                 return content;
             }
+
             public void setContent(Object content) {
                 this.content = content;
             }
@@ -98,25 +97,19 @@ public class HTTPRequestMultipartBody {
         public HTTPRequestMultipartBody build() throws IOException {
             String boundary = new BigInteger(256, new SecureRandom()).toString();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
+
             for (MultiPartRecord record : parts) {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("--" + boundary + "\r\n" + "Content-Disposition: form-data; name=\"" + record.getFieldName());
+
                 if (record.getFilename() != null) {
                     stringBuilder.append("\"; filename=\"" + record.getFilename());
                 }
                 out.write(stringBuilder.toString().getBytes(StandardCharsets.UTF_8));
                 out.write(("\"\r\n").getBytes(StandardCharsets.UTF_8));
                 Object content = record.getContent();
-                if (content instanceof String) {
-                    out.write(("\r\n\r\n").getBytes(StandardCharsets.UTF_8));
-                    out.write(((String) content).getBytes(StandardCharsets.UTF_8));
-                } else if (content instanceof MultipartFile) {
-                    out.write(("Content-Type: " + ((MultipartFile) content).getContentType() + "\r\n\r\n").getBytes());
-                    out.write(((MultipartFile) content).getBytes());
-                } else if (content instanceof byte[]) {
-                    out.write(("Content-Type: application/octet-stream\r\n\r\n").getBytes(StandardCharsets.UTF_8));
-                    out.write((byte[]) content);
-                } else if (content instanceof File) {
+
+                if (content instanceof File) {
                     out.write(("Content-Type: application/octet-stream\r\n\r\n").getBytes(StandardCharsets.UTF_8));
                     Files.copy(((File) content).toPath(), out);
                 } else {
