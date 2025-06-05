@@ -3,6 +3,7 @@ package com.github.hakazescarlet.pairimagestorage;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -30,30 +31,35 @@ public class ImageHttpRequestSender {
             } catch (IOException e) {
                 throw new DirectoryCreatingException("Failed to create directory /temp", e);
             }
+        }
 
-            Path tempDir = path
-                    .resolve(Objects.requireNonNull(image.getOriginalFilename()))
-                    .normalize()
-                    .toAbsolutePath();
-            try {
-                Files.copy(image.getInputStream(), tempDir);
-            } catch (IOException e) {
-                throw new ImageSavingException("Unable to save image " + image.getName(), e);
-            }
+        Path tempDir = path
+                .resolve(Objects.requireNonNull(image.getOriginalFilename()))
+                .normalize()
+                .toAbsolutePath();
+        try {
+            Files.copy(image.getInputStream(), tempDir);
+        } catch (IOException e) {
+            throw new ImageSavingException("Unable to save image " + image.getName(), e);
+        }
 
-            try {
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:5000/convert_image"))
-                        .headers("Content-Type", image.getContentType())
-                        .POST(HttpRequest.BodyPublishers.ofFile(tempDir))
+        try {
+            File file = new File(tempDir.toString());
+            HTTPRequestMultipartBody multipartBody = new HTTPRequestMultipartBody.Builder()
+                        .addPart("image", file, image.getContentType(), image.getOriginalFilename())
                         .build();
 
-                httpClient.send(request, HttpResponse.BodyHandlers.ofFile(tempDir));
-            } catch (IOException e) {
-                throw new IOResourceException("Unable to extract data from response or send request to server", e);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:5000/convert_image"))
+                    .headers("Content-Type", multipartBody.getContentType())
+                    .POST(HttpRequest.BodyPublishers.ofByteArray(multipartBody.getBody()))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException e) {
+            throw new IOResourceException("Unable to extract data from response or send request to server", e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
