@@ -17,8 +17,6 @@ import java.util.Objects;
 @Component
 public class ImageHttpRequestSender {
 
-    private static final int STATUS_CODE_OK = 200;
-
     private final HttpClient httpClient;
 
     public ImageHttpRequestSender(HttpClient httpClient) {
@@ -58,7 +56,7 @@ public class ImageHttpRequestSender {
                     .build();
 
             HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            if (STATUS_CODE_OK == response.statusCode()) {
+            if (StatusCodeHttpResponse.STATUS_CODE_OK == response.statusCode()) {
                 return response;
             }
             return new StatusCodeHttpResponse(response.statusCode());
