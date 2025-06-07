@@ -23,7 +23,7 @@ public class ImageHttpRequestSender {
         this.httpClient = httpClient;
     }
 
-    public void send(MultipartFile image) {
+    public HttpResponse<byte[]> send(MultipartFile image) {
         Path path = Paths.get("temp");
         if (Files.notExists(path)) {
             try {
@@ -46,8 +46,8 @@ public class ImageHttpRequestSender {
         try {
             File file = new File(tempDir.toString());
             HTTPRequestMultipartBody multipartBody = new HTTPRequestMultipartBody.Builder()
-                        .addPart("image", file, image.getContentType(), image.getOriginalFilename())
-                        .build();
+                    .addPart("image", file, image.getContentType(), image.getOriginalFilename())
+                    .build();
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("http://localhost:5000/convert_image"))
@@ -55,7 +55,11 @@ public class ImageHttpRequestSender {
                     .POST(HttpRequest.BodyPublishers.ofByteArray(multipartBody.getBody()))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            if (response.statusCode() == 200) {
+                return response;
+            }
+            return new StatusCodeHttpResponse(response.statusCode());
         } catch (IOException e) {
             throw new IOResourceException("Unable to extract data from response or send request to server", e);
         } catch (InterruptedException e) {
