@@ -17,6 +17,8 @@ import java.util.Objects;
 @Component
 public class ImageHttpRequestSender {
 
+    private static final int STATUS_CODE_OK = 200;
+
     private final HttpClient httpClient;
 
     public ImageHttpRequestSender(HttpClient httpClient) {
@@ -56,14 +58,14 @@ public class ImageHttpRequestSender {
                     .build();
 
             HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            if (response.statusCode() == 200) {
+            if (STATUS_CODE_OK == response.statusCode()) {
                 return response;
             }
             return new StatusCodeHttpResponse(response.statusCode());
         } catch (IOException e) {
             throw new IOResourceException("Unable to extract data from response or send request to server", e);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new ResponseReturnException("Failed to get response", e);
         }
     }
 
@@ -81,6 +83,12 @@ public class ImageHttpRequestSender {
 
     private static class IOResourceException extends RuntimeException {
         public IOResourceException(String message, Exception e) {
+            super(message, e);
+        }
+    }
+
+    private static class ResponseReturnException extends RuntimeException {
+        public ResponseReturnException(String message, Exception e) {
             super(message, e);
         }
     }

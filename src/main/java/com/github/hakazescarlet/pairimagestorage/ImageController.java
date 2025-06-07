@@ -1,6 +1,7 @@
 package com.github.hakazescarlet.pairimagestorage;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -30,12 +31,18 @@ public class ImageController {
         byte[] body = response.body();
         Map<String, List<String>> headers = response.headers().map();
         String extension = StringUtils.getFilenameExtension(image.getOriginalFilename());
-        // TODO: handle 500 status code
-        return ResponseEntity
-                .ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, headers.get(HttpHeaders.CONTENT_DISPOSITION).getFirst())
-                .header(HttpHeaders.CONTENT_TYPE, getMediaType(extension))
-                .body(body);
+
+        if (response.statusCode() == StatusCodeHttpResponse.SERVER_ERROR_CODE) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(body);
+        } else {
+            return ResponseEntity
+                    .ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, headers.get(HttpHeaders.CONTENT_DISPOSITION).getFirst())
+                    .header(HttpHeaders.CONTENT_TYPE, getMediaType(extension))
+                    .body(body);
+        }
     }
 
     private String getMediaType(String extension) {

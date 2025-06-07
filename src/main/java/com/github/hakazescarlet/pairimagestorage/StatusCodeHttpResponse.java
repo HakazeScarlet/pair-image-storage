@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public class StatusCodeHttpResponse implements HttpResponse<byte[]> {
 
+    public static final int SERVER_ERROR_CODE = 500;
+
     private final Integer statusCode;
 
     public StatusCodeHttpResponse(int statusCode) {
