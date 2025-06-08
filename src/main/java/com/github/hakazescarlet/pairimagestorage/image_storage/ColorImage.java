@@ -1,11 +1,28 @@
 package com.github.hakazescarlet.pairimagestorage.image_storage;
 
-import org.springframework.data.annotation.Id;
-
 public class ColorImage {
 
-    @Id
-    private String id;
+    private String imageName;
+    private byte[] colorImage;
 
+    public ColorImage(String imageName, byte[] colorImage) {
+        this.imageName = imageName;
+        this.colorImage = colorImage;
+    }
 
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public byte[] getColorImage() {
+        return colorImage;
+    }
+
+    public void setColorImage(byte[] colorImage) {
+        this.colorImage = colorImage;
+    }
 }
