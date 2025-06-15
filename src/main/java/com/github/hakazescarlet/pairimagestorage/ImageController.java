@@ -1,5 +1,8 @@
 package com.github.hakazescarlet.pairimagestorage;
 
+import com.github.hakazescarlet.pairimagestorage.image_storage.Image;
+import com.github.hakazescarlet.pairimagestorage.image_storage.ImageService;
+import com.github.hakazescarlet.pairimagestorage.image_storage.PairImage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
@@ -20,15 +24,27 @@ import java.util.Map;
 public class ImageController {
 
     private final ImageHttpRequestSender imageHttpRequestSender;
+    private final ImageService imageService;
 
-    public ImageController(ImageHttpRequestSender imageHttpRequestSender) {
+    public ImageController(ImageHttpRequestSender imageHttpRequestSender, ImageService imageService) {
         this.imageHttpRequestSender = imageHttpRequestSender;
+        this.imageService = imageService;
     }
 
     @PostMapping("/send_image")
     public ResponseEntity<byte[]> getImage(@RequestParam("image") MultipartFile image) {
         HttpResponse<byte[]> response = imageHttpRequestSender.send(image);
         byte[] body = response.body();
+
+        try {
+            Image colorfulImage = new Image(image.getOriginalFilename(), image.getBytes());
+            Image grayImage = new Image("gray" + image.getOriginalFilename(), body);
+            PairImage pairImage = new PairImage(colorfulImage, grayImage, "pair" + colorfulImage.getName());
+            imageService.savePair(pairImage);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         Map<String, List<String>> headers = response.headers().map();
         String extension = StringUtils.getFilenameExtension(image.getOriginalFilename());
 

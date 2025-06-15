@@ -9,27 +9,37 @@ public class PairImage {
     @Id
     private String id;
 
-    private ColorImage colorImage;
-    private GrayImage grayImage;
+    private Image colorfulImage;
+    private Image grayImage;
+    private String pairName;
 
-    public PairImage(ColorImage colorImage, GrayImage grayImage) {
-        this.colorImage = colorImage;
+    public PairImage(Image colorfulImage, Image grayImage, String pairName) {
+        this.colorfulImage = colorfulImage;
         this.grayImage = grayImage;
+        this.pairName = pairName;
     }
 
-    public ColorImage getColorImage() {
-        return colorImage;
+    public Image getColorfulImage() {
+        return colorfulImage;
     }
 
-    public void setColorImage(ColorImage colorImage) {
-        this.colorImage = colorImage;
+    public void setColorfulImage(Image image) {
+        this.colorfulImage = image;
     }
 
-    public GrayImage getGrayImage() {
+    public Image getGrayImage() {
         return grayImage;
     }
 
-    public void setGrayImage(GrayImage grayImage) {
+    public void setGrayImage(Image grayImage) {
         this.grayImage = grayImage;
+    }
+
+    public String getPairName() {
+        return pairName;
+    }
+
+    public void setPairName(String pairName) {
+        this.pairName = pairName;
     }
 }
