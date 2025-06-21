@@ -36,7 +36,7 @@ public class PairImage {
     }
 
     public String getPairName() {
-        return pairName;
+        return "pair_" + colorfulImage.getName();
     }
 
     public void setPairName(String pairName) {

@@ -3,6 +3,8 @@ package com.github.hakazescarlet.pairimagestorage;
 import com.github.hakazescarlet.pairimagestorage.image_storage.Image;
 import com.github.hakazescarlet.pairimagestorage.image_storage.ImageService;
 import com.github.hakazescarlet.pairimagestorage.image_storage.PairImage;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,7 +42,16 @@ public class ImageController {
             Image colorfulImage = new Image(image.getOriginalFilename(), image.getBytes());
             Image grayImage = new Image("gray" + image.getOriginalFilename(), body);
             PairImage pairImage = new PairImage(colorfulImage, grayImage, "pair" + colorfulImage.getName());
-            imageService.savePair(pairImage);
+
+            if (pairImage.getColorfulImage() != null && pairImage.getGrayImage() != null) {
+                MongoCollection<Document> imagePairCollection = database.getCollection("image_pairs");
+                Document imagePairDocument = new Document("image1_id", imageIds.get(0)).append("image2_id", imageIds.get(1));
+                imagePairCollection.insertOne(imagePairDocument);
+                System.out.println("Image pair saved with IDs: " + imageIds.get(0) + " and " + imageIds.get(1));
+            } else {
+                System.err.println("Error: Could not save image pair.");
+            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
