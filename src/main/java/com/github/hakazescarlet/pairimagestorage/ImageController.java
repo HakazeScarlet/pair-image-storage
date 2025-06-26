@@ -1,10 +1,7 @@
 package com.github.hakazescarlet.pairimagestorage;
 
-import com.github.hakazescarlet.pairimagestorage.image_storage.Image;
-import com.github.hakazescarlet.pairimagestorage.image_storage.ImageService;
-import com.github.hakazescarlet.pairimagestorage.image_storage.PairImage;
-import com.mongodb.client.MongoCollection;
-import org.bson.Document;
+import com.github.hakazescarlet.pairimagestorage.image_storage.PairImageService;
+import com.github.hakazescarlet.pairimagestorage.image_storage.RawImagesHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,11 +23,11 @@ import java.util.Map;
 public class ImageController {
 
     private final ImageHttpRequestSender imageHttpRequestSender;
-    private final ImageService imageService;
+    private final PairImageService pairImageService;
 
-    public ImageController(ImageHttpRequestSender imageHttpRequestSender, ImageService imageService) {
+    public ImageController(ImageHttpRequestSender imageHttpRequestSender, PairImageService pairImageService) {
         this.imageHttpRequestSender = imageHttpRequestSender;
-        this.imageService = imageService;
+        this.pairImageService = pairImageService;
     }
 
     @PostMapping("/send_image")
@@ -38,26 +35,14 @@ public class ImageController {
         HttpResponse<byte[]> response = imageHttpRequestSender.send(image);
         byte[] body = response.body();
 
+        Map<String, List<String>> headers = response.headers().map();
+        String extension = StringUtils.getFilenameExtension(image.getOriginalFilename());
+
         try {
-            Image colorfulImage = new Image(image.getOriginalFilename(), image.getBytes());
-            Image grayImage = new Image("gray" + image.getOriginalFilename(), body);
-            PairImage pairImage = new PairImage(colorfulImage, grayImage, "pair" + colorfulImage.getName());
-
-            if (pairImage.getColorfulImage() != null && pairImage.getGrayImage() != null) {
-                MongoCollection<Document> imagePairCollection = database.getCollection("image_pairs");
-                Document imagePairDocument = new Document("image1_id", imageIds.get(0)).append("image2_id", imageIds.get(1));
-                imagePairCollection.insertOne(imagePairDocument);
-                System.out.println("Image pair saved with IDs: " + imageIds.get(0) + " and " + imageIds.get(1));
-            } else {
-                System.err.println("Error: Could not save image pair.");
-            }
-
+            pairImageService.save(new RawImagesHolder(image.getBytes(), body, image.getContentType()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        Map<String, List<String>> headers = response.headers().map();
-        String extension = StringUtils.getFilenameExtension(image.getOriginalFilename());
 
         if (response.statusCode() == StatusCodeHttpResponse.SERVER_ERROR_CODE) {
             return ResponseEntity

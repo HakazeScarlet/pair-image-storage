@@ -1,0 +1,23 @@
+package com.github.hakazescarlet.pairimagestorage.image_storage;
+
+import org.bson.types.Binary;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PairImageService {
+
+    private final PairImageRepository pairImageRepository;
+
+    public PairImageService(PairImageRepository pairImageRepository) {
+        this.pairImageRepository = pairImageRepository;
+    }
+
+    public String save(RawImagesHolder rawImages) {
+        PairImage images = new PairImage();
+        images.setColorfulImage(new Binary(rawImages.getColorfulImage()));
+        images.setGrayImage(new Binary(rawImages.getGrayImage()));
+        images.setContentType(rawImages.getContentType());
+        pairImageRepository.insert(images);
+        return images.getId();
+    }
+}

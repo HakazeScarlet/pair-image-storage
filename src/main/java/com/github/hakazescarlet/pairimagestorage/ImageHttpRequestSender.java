@@ -1,6 +1,5 @@
 package com.github.hakazescarlet.pairimagestorage;
 
-import com.github.hakazescarlet.pairimagestorage.image_storage.Image;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,7 +18,6 @@ import java.util.Objects;
 public class ImageHttpRequestSender {
 
     private final HttpClient httpClient;
-    private Image image;
 
     public ImageHttpRequestSender(HttpClient httpClient) {
         this.httpClient = httpClient;
