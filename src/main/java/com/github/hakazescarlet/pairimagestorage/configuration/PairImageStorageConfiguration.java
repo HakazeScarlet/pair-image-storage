@@ -13,11 +13,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -55,7 +58,6 @@ public class PairImageStorageConfiguration {
     }
 
     @PostConstruct
-    @PreDestroy
     public void createDirectory() {
         Path path = Paths.get("temp");
         if (Files.notExists(path)) {
@@ -67,8 +69,27 @@ public class PairImageStorageConfiguration {
         }
     }
 
+    @PreDestroy
+    public void deleteDirectory() {
+        Path path = Paths.get("temp");
+        try (Stream<Path> deletedFiles = Files.walk(path)) {
+            deletedFiles
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+    } catch (IOException e) {
+            throw new DirectoryDeletingException("Failed to delete directory " + path, e);
+        }
+    }
+
     private static class DirectoryCreatingException extends RuntimeException {
         public DirectoryCreatingException(String message, Exception e) {
+            super(message, e);
+        }
+    }
+
+    private static class DirectoryDeletingException extends RuntimeException {
+        public DirectoryDeletingException(String message, Exception e) {
             super(message, e);
         }
     }
