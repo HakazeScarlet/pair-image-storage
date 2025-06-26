@@ -25,14 +25,6 @@ public class ImageHttpRequestSender {
 
     public HttpResponse<byte[]> send(MultipartFile image) {
         Path path = Paths.get("temp");
-        if (Files.notExists(path)) {
-            try {
-                Files.createDirectory(path);
-            } catch (IOException e) {
-                throw new DirectoryCreatingException("Failed to create directory /temp", e);
-            }
-        }
-
         Path tempDir = path
                 .resolve(Objects.requireNonNull(image.getOriginalFilename()))
                 .normalize()
@@ -64,12 +56,6 @@ public class ImageHttpRequestSender {
             throw new IOResourceException("Unable to extract data from response or send request to server", e);
         } catch (InterruptedException e) {
             throw new ResponseReturnException("Failed to get response", e);
-        }
-    }
-
-    private static class DirectoryCreatingException extends RuntimeException {
-        public DirectoryCreatingException(String message, Exception e) {
-            super(message, e);
         }
     }
 
