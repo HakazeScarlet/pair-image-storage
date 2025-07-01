@@ -30,7 +30,7 @@ public class ImageController {
         this.pairImageService = pairImageService;
     }
 
-    @PostMapping("/send_image")
+    @PostMapping("/images/convert")
     public ResponseEntity<byte[]> getImage(@RequestParam("image") MultipartFile image) {
         HttpResponse<byte[]> response = imageHttpRequestSender.send(image);
         byte[] body = response.body();
@@ -41,7 +41,7 @@ public class ImageController {
         try {
             pairImageService.save(new RawImagesHolder(image.getBytes(), body, image.getContentType()));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new MultipartFileException("Could not save file: " + image.getOriginalFilename(), e);
         }
 
         if (response.statusCode() == StatusCodeHttpResponse.SERVER_ERROR_CODE) {
@@ -64,6 +64,12 @@ public class ImageController {
             return MediaType.IMAGE_JPEG_VALUE;
         } else {
             return MediaType.IMAGE_PNG_VALUE;
+        }
+    }
+
+    private static class MultipartFileException extends RuntimeException {
+        public MultipartFileException(String message, Exception e) {
+            super(message, e);
         }
     }
 }

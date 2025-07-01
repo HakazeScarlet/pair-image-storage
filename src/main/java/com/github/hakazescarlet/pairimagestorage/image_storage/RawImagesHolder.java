@@ -1,31 +1,34 @@
 package com.github.hakazescarlet.pairimagestorage.image_storage;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class RawImagesHolder {
 
-    private byte[] colorfulImage;
-    private byte[] grayImage;
+    private byte[] colorful;
+    private byte[] gray;
     private String contentType;
 
-    public RawImagesHolder(byte[] colorfulImage, byte[] grayImage, String contentType) {
-        this.colorfulImage = colorfulImage;
-        this.grayImage = grayImage;
+    public RawImagesHolder(byte[] colorful, byte[] gray, String contentType) {
+        this.colorful = colorful;
+        this.gray = gray;
         this.contentType = contentType;
     }
 
-    public byte[] getColorfulImage() {
-        return colorfulImage;
+    public byte[] getColorful() {
+        return colorful;
     }
 
-    public void setColorfulImage(byte[] colorfulImage) {
-        this.colorfulImage = colorfulImage;
+    public void setColorful(byte[] colorful) {
+        this.colorful = colorful;
     }
 
-    public byte[] getGrayImage() {
-        return grayImage;
+    public byte[] getGray() {
+        return gray;
     }
 
-    public void setGrayImage(byte[] grayImage) {
-        this.grayImage = grayImage;
+    public void setGray(byte[] gray) {
+        this.gray = gray;
     }
 
     public String getContentType() {
@@ -34,5 +37,17 @@ public class RawImagesHolder {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        RawImagesHolder that = (RawImagesHolder) o;
+        return Objects.deepEquals(colorful, that.colorful) && Objects.deepEquals(gray, that.gray) && Objects.equals(contentType, that.contentType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(colorful), Arrays.hashCode(gray), contentType);
     }
 }
