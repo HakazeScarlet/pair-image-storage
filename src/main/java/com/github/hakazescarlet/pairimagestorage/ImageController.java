@@ -2,9 +2,9 @@ package com.github.hakazescarlet.pairimagestorage;
 
 import com.github.hakazescarlet.pairimagestorage.image_storage.PairImageService;
 import com.github.hakazescarlet.pairimagestorage.image_storage.RawImagesHolder;
+import com.github.hakazescarlet.pairimagestorage.utils.MediaTypeResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,18 +52,8 @@ public class ImageController {
             return ResponseEntity
                     .ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, headers.get(HttpHeaders.CONTENT_DISPOSITION).getFirst())
-                    .header(HttpHeaders.CONTENT_TYPE, getMediaType(extension))
+                    .header(HttpHeaders.CONTENT_TYPE, MediaTypeResolver.resolve(extension))
                     .body(body);
-        }
-    }
-
-    private String getMediaType(String extension) {
-        if ("gif".equals(extension)) {
-            return MediaType.IMAGE_GIF_VALUE;
-        } else if ("jpeg".equals(extension)) {
-            return MediaType.IMAGE_JPEG_VALUE;
-        } else {
-            return MediaType.IMAGE_PNG_VALUE;
         }
     }
 
