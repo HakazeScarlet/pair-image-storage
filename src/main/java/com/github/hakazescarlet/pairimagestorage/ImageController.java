@@ -44,7 +44,7 @@ public class ImageController {
             throw new MultipartFileException("Could not save file: " + image.getOriginalFilename(), e);
         }
 
-        if (response.statusCode() == StatusCodeHttpResponse.SERVER_ERROR_CODE) {
+        if (response.statusCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(body);
