@@ -1,5 +1,6 @@
 package com.github.hakazescarlet.pairimagestorage;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,10 +49,10 @@ public class ImageHttpRequestSender {
                     .build();
 
             HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            if (StatusCodeHttpResponse.STATUS_CODE_OK == response.statusCode()) {
+            if (HttpStatus.OK.value() == response.statusCode()) {
                 return response;
             }
-            return new StatusCodeHttpResponse(response.statusCode());
+            return response;
         } catch (IOException e) {
             throw new IOResourceException("Unable to extract data from response or send request to server", e);
         } catch (InterruptedException e) {
