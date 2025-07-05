@@ -1,4 +1,4 @@
-package com.github.hakazescarlet.pairimagestorage;
+package com.github.hakazescarlet.pairimagestorage.http_client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -11,12 +11,12 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HTTPRequestMultipartBody {
+public class HttpRequestMultipartBody {
 
     private byte[] bytes;
     private String boundary;
 
-    private HTTPRequestMultipartBody(byte[] bytes, String boundary) {
+    private HttpRequestMultipartBody(byte[] bytes, String boundary) {
         this.bytes = bytes;
         this.boundary = boundary;
     }
@@ -94,7 +94,7 @@ public class HTTPRequestMultipartBody {
             return this;
         }
 
-        public HTTPRequestMultipartBody build() throws IOException {
+        public HttpRequestMultipartBody build() throws IOException {
             String boundary = new BigInteger(256, new SecureRandom()).toString();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -122,7 +122,7 @@ public class HTTPRequestMultipartBody {
             }
             out.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
 
-            HTTPRequestMultipartBody httpRequestMultipartBody = new HTTPRequestMultipartBody(out.toByteArray(), boundary);
+            HttpRequestMultipartBody httpRequestMultipartBody = new HttpRequestMultipartBody(out.toByteArray(), boundary);
             return httpRequestMultipartBody;
         }
 

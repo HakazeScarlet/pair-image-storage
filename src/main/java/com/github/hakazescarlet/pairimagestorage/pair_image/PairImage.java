@@ -4,13 +4,15 @@ import org.bson.types.Binary;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Objects;
+
 @Document
 public class PairImage {
 
     @Id
     private String id;
-    private Binary colorfulImage;
-    private Binary grayImage;
+    private Binary colorful;
+    private Binary gray;
     private String contentType;
 
     public String getId() {
@@ -21,20 +23,20 @@ public class PairImage {
         this.id = id;
     }
 
-    public Binary getColorfulImage() {
-        return colorfulImage;
+    public Binary getColorful() {
+        return colorful;
     }
 
-    public void setColorfulImage(Binary colorfulImage) {
-        this.colorfulImage = colorfulImage;
+    public void setColorful(Binary colorful) {
+        this.colorful = colorful;
     }
 
-    public Binary getGrayImage() {
-        return grayImage;
+    public Binary getGray() {
+        return gray;
     }
 
-    public void setGrayImage(Binary grayImage) {
-        this.grayImage = grayImage;
+    public void setGray(Binary gray) {
+        this.gray = gray;
     }
 
     public String getContentType() {
@@ -43,5 +45,27 @@ public class PairImage {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PairImage pairImage = (PairImage) o;
+        return Objects.equals(id, pairImage.id) && Objects.equals(colorful, pairImage.colorful) && Objects.equals(gray, pairImage.gray) && Objects.equals(contentType, pairImage.contentType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, colorful, gray, contentType);
+    }
+
+    @Override
+    public String toString() {
+        return "PairImage{" +
+            "id='" + id + '\'' +
+            ", colorful=" + colorful +
+            ", gray=" + gray +
+            ", contentType='" + contentType + '\'' +
+            '}';
     }
 }

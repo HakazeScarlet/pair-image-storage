@@ -1,4 +1,4 @@
-package com.github.hakazescarlet.pairimagestorage;
+package com.github.hakazescarlet.pairimagestorage.http_client;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -19,13 +19,23 @@ import java.util.Objects;
 public class ImageHttpRequestSender {
 
     private final HttpClient httpClient;
+    private final String TEMP_DIRECTORY = "temp";
 
     public ImageHttpRequestSender(HttpClient httpClient) {
         this.httpClient = httpClient;
+
+        Path path = Paths.get(TEMP_DIRECTORY);
+        if (Files.notExists(path)) {
+            try {
+                Files.createDirectory(path);
+            } catch (IOException e) {
+                throw new DirectoryCreatingException("Failed to create directory /temp", e);
+            }
+        }
     }
 
     public HttpResponse<byte[]> send(MultipartFile image) {
-        Path path = Paths.get("temp");
+        Path path = Paths.get(TEMP_DIRECTORY);
         Path tempDir = path
             .resolve(Objects.requireNonNull(image.getOriginalFilename()))
             .normalize()
@@ -38,7 +48,7 @@ public class ImageHttpRequestSender {
 
         try {
             File file = new File(tempDir.toString());
-            HTTPRequestMultipartBody multipartBody = new HTTPRequestMultipartBody.Builder()
+            HttpRequestMultipartBody multipartBody = new HttpRequestMultipartBody.Builder()
                 .addPart("image", file, image.getContentType(), image.getOriginalFilename())
                 .build();
 
@@ -57,6 +67,12 @@ public class ImageHttpRequestSender {
             throw new IOResourceException("Unable to extract data from response or send request to server", e);
         } catch (InterruptedException e) {
             throw new ResponseReturnException("Failed to get response", e);
+        }
+    }
+
+    private static class DirectoryCreatingException extends RuntimeException {
+        public DirectoryCreatingException(String message, Exception e) {
+            super(message, e);
         }
     }
 

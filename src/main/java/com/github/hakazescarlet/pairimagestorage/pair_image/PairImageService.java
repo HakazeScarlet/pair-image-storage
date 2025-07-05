@@ -14,8 +14,8 @@ public class PairImageService {
 
     public String save(RawImagesHolder rawImages) {
         PairImage images = new PairImage();
-        images.setColorfulImage(new Binary(rawImages.getColorful()));
-        images.setGrayImage(new Binary(rawImages.getGray()));
+        images.setColorful(new Binary(rawImages.getColorful()));
+        images.setGray(new Binary(rawImages.getGray()));
         images.setContentType(rawImages.getContentType());
         pairImageRepository.insert(images);
         return images.getId();

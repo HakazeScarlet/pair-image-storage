@@ -1,6 +1,6 @@
 package com.github.hakazescarlet.pairimagestorage.pair_image;
 
-import com.github.hakazescarlet.pairimagestorage.ImageHttpRequestSender;
+import com.github.hakazescarlet.pairimagestorage.http_client.ImageHttpRequestSender;
 import com.github.hakazescarlet.pairimagestorage.utils.MediaTypeResolver;
 import jakarta.annotation.PreDestroy;
 import org.springframework.http.HttpHeaders;
@@ -34,17 +34,9 @@ public class ImageController {
     public ImageController(ImageHttpRequestSender imageHttpRequestSender, PairImageService pairImageService) {
         this.imageHttpRequestSender = imageHttpRequestSender;
         this.pairImageService = pairImageService;
-        Path path = Paths.get("temp");
-        if (Files.notExists(path)) {
-            try {
-                Files.createDirectory(path);
-            } catch (IOException e) {
-                throw new DirectoryCreatingException("Failed to create directory /temp", e);
-            }
-        }
     }
 
-    @PostMapping("/images/convert")
+    @PostMapping("/send_image")
     public ResponseEntity<byte[]> getImage(@RequestParam("image") MultipartFile image) {
         HttpResponse<byte[]> response = imageHttpRequestSender.send(image);
         byte[] body = response.body();
@@ -86,12 +78,6 @@ public class ImageController {
 
     private static class MultipartFileException extends RuntimeException {
         public MultipartFileException(String message, Exception e) {
-            super(message, e);
-        }
-    }
-
-    private static class DirectoryCreatingException extends RuntimeException {
-        public DirectoryCreatingException(String message, Exception e) {
             super(message, e);
         }
     }
