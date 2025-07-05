@@ -1,7 +1,6 @@
-package com.github.hakazescarlet.pairimagestorage;
+package com.github.hakazescarlet.pairimagestorage.pair_image;
 
-import com.github.hakazescarlet.pairimagestorage.image_storage.PairImageService;
-import com.github.hakazescarlet.pairimagestorage.image_storage.RawImagesHolder;
+import com.github.hakazescarlet.pairimagestorage.ImageHttpRequestSender;
 import com.github.hakazescarlet.pairimagestorage.utils.MediaTypeResolver;
 import jakarta.annotation.PreDestroy;
 import org.springframework.http.HttpHeaders;
@@ -61,14 +60,14 @@ public class ImageController {
 
         if (response.statusCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
             return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(body);
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(body);
         } else {
             return ResponseEntity
-                    .ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, headers.get(HttpHeaders.CONTENT_DISPOSITION).getFirst())
-                    .header(HttpHeaders.CONTENT_TYPE, MediaTypeResolver.resolve(extension))
-                    .body(body);
+                .ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, headers.get(HttpHeaders.CONTENT_DISPOSITION).getFirst())
+                .header(HttpHeaders.CONTENT_TYPE, MediaTypeResolver.resolve(extension))
+                .body(body);
         }
     }
 
@@ -77,9 +76,9 @@ public class ImageController {
         Path path = Paths.get("temp");
         try (Stream<Path> deletedFiles = Files.walk(path)) {
             deletedFiles
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
         } catch (IOException e) {
             throw new DirectoryDeletingException("Failed to delete directory " + path, e);
         }

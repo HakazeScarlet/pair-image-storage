@@ -7,6 +7,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,9 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 @ComponentScan
 public class PairImageStorageConfiguration {
 
+    @Value("${spring.datasource.url}")
+    private String datasource;
+
     @Bean
     public HttpClient createHttpClient() {
         return HttpClient.newHttpClient();
@@ -27,24 +31,23 @@ public class PairImageStorageConfiguration {
 
     @Bean
     public MongoClient createMongoClient() {
-        try {
-            CodecRegistry pojoCodecRegistry = fromRegistries(
-                    MongoClientSettings.getDefaultCodecRegistry(),
-                    fromProviders(PojoCodecProvider.builder().automatic(true).build())
-            );
+        CodecRegistry pojoCodecRegistry = fromRegistries(
+            MongoClientSettings.getDefaultCodecRegistry(),
+            fromProviders(PojoCodecProvider.builder().automatic(true).build())
+        );
 
-            MongoCredential scramSha1Credential = MongoCredential.createScramSha1Credential("admin", "image_db", "pass".toCharArray());
+        MongoCredential scramSha1Credential = MongoCredential.createScramSha1Credential(
+            System.getenv("DB_USERNAME"),
+            System.getenv("DB_COLLECTION"),
+            System.getenv("DB_PASSWORD").toCharArray()
+        );
 
-            MongoClientSettings settings = MongoClientSettings.builder()
-                    .applyConnectionString(new ConnectionString("mongodb://localhost:27017"))
-                    .credential(scramSha1Credential)
-                    .codecRegistry(pojoCodecRegistry)
-                    .build();
+        MongoClientSettings settings = MongoClientSettings.builder()
+            .applyConnectionString(new ConnectionString(datasource))
+            .credential(scramSha1Credential)
+            .codecRegistry(pojoCodecRegistry)
+            .build();
 
-            return MongoClients.create(settings);
-        } catch (Exception exception) {
-            // TODO: handle custom exception
-            throw new RuntimeException(exception);
-        }
+        return MongoClients.create(settings);
     }
 }

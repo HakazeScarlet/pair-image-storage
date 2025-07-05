@@ -7,13 +7,13 @@ import java.util.Map;
 public class MediaTypeResolver {
 
     private static final Map<String, String> MEDIA_TYPES = Map.of(
-            "gif", MediaType.IMAGE_GIF_VALUE,
-            "jpeg", MediaType.IMAGE_JPEG_VALUE,
-            "jpg", MediaType.IMAGE_JPEG_VALUE,
-            "png", MediaType.IMAGE_PNG_VALUE,
-            "webp", "image/webp",
-            "svg", "image/svg+xml",
-            "bmp", "image/bmp"
+        "gif", MediaType.IMAGE_GIF_VALUE,
+        "jpeg", MediaType.IMAGE_JPEG_VALUE,
+        "jpg", MediaType.IMAGE_JPEG_VALUE,
+        "png", MediaType.IMAGE_PNG_VALUE,
+        "webp", "image/webp",
+        "svg", "image/svg+xml",
+        "bmp", "image/bmp"
     );
 
     private static final String DEFAULT_MEDIA_TYPE = MediaType.APPLICATION_OCTET_STREAM_VALUE;

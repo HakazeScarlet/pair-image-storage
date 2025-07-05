@@ -27,9 +27,9 @@ public class ImageHttpRequestSender {
     public HttpResponse<byte[]> send(MultipartFile image) {
         Path path = Paths.get("temp");
         Path tempDir = path
-                .resolve(Objects.requireNonNull(image.getOriginalFilename()))
-                .normalize()
-                .toAbsolutePath();
+            .resolve(Objects.requireNonNull(image.getOriginalFilename()))
+            .normalize()
+            .toAbsolutePath();
         try {
             Files.copy(image.getInputStream(), tempDir);
         } catch (IOException e) {
@@ -39,14 +39,14 @@ public class ImageHttpRequestSender {
         try {
             File file = new File(tempDir.toString());
             HTTPRequestMultipartBody multipartBody = new HTTPRequestMultipartBody.Builder()
-                    .addPart("image", file, image.getContentType(), image.getOriginalFilename())
-                    .build();
+                .addPart("image", file, image.getContentType(), image.getOriginalFilename())
+                .build();
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:5000/convert_image"))
-                    .headers("Content-Type", multipartBody.getContentType())
-                    .POST(HttpRequest.BodyPublishers.ofByteArray(multipartBody.getBody()))
-                    .build();
+                .uri(URI.create("http://localhost:5000/convert_image"))
+                .headers("Content-Type", multipartBody.getContentType())
+                .POST(HttpRequest.BodyPublishers.ofByteArray(multipartBody.getBody()))
+                .build();
 
             HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
             if (HttpStatus.OK.value() == response.statusCode()) {

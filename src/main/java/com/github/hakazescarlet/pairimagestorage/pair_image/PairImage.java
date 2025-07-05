@@ -1,4 +1,4 @@
-package com.github.hakazescarlet.pairimagestorage.image_storage;
+package com.github.hakazescarlet.pairimagestorage.pair_image;
 
 import org.bson.types.Binary;
 import org.springframework.data.annotation.Id;
