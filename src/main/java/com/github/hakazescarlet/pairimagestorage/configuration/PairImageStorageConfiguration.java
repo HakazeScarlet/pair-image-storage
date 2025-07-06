@@ -21,7 +21,12 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 @ComponentScan
 public class PairImageStorageConfiguration {
 
-    @Value("${spring.datasource.url}")
+    public static final String IMAGE_KEY = "image";
+
+    @Value("${spring.data.mongodb.database}")
+    private String dbCollection;
+
+    @Value("${mongo.datasource.url}")
     private String datasource;
 
     @Bean
@@ -38,7 +43,7 @@ public class PairImageStorageConfiguration {
 
         MongoCredential scramSha1Credential = MongoCredential.createScramSha1Credential(
             System.getenv("DB_USERNAME"),
-            System.getenv("DB_COLLECTION"),
+            dbCollection,
             System.getenv("DB_PASSWORD").toCharArray()
         );
 

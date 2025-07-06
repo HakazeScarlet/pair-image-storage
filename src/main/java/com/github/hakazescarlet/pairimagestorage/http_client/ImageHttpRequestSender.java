@@ -1,5 +1,8 @@
 package com.github.hakazescarlet.pairimagestorage.http_client;
 
+import com.github.hakazescarlet.pairimagestorage.configuration.PairImageStorageConfiguration;
+import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,13 +16,19 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @Component
 public class ImageHttpRequestSender {
 
+    private static final String TEMP_DIRECTORY = "temp";
+
+    @Value("${server.url}")
+    private String serverUrl;
+
     private final HttpClient httpClient;
-    private final String TEMP_DIRECTORY = "temp";
 
     public ImageHttpRequestSender(HttpClient httpClient) {
         this.httpClient = httpClient;
@@ -29,7 +38,7 @@ public class ImageHttpRequestSender {
             try {
                 Files.createDirectory(path);
             } catch (IOException e) {
-                throw new DirectoryCreatingException("Failed to create directory /temp", e);
+                throw new CreateDirectoryException("Failed to create directory /temp", e);
             }
         }
     }
@@ -43,17 +52,22 @@ public class ImageHttpRequestSender {
         try {
             Files.copy(image.getInputStream(), tempDir);
         } catch (IOException e) {
-            throw new ImageSavingException("Unable to save image " + image.getName(), e);
+            throw new SaveImageException("Unable to save image " + image.getName(), e);
         }
 
         try {
             File file = new File(tempDir.toString());
             HttpRequestMultipartBody multipartBody = new HttpRequestMultipartBody.Builder()
-                .addPart("image", file, image.getContentType(), image.getOriginalFilename())
+                .addPart(
+                    PairImageStorageConfiguration.IMAGE_KEY,
+                    file,
+                    image.getContentType(),
+                    image.getOriginalFilename()
+                )
                 .build();
 
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:5000/convert_image"))
+                .uri(URI.create(serverUrl))
                 .headers("Content-Type", multipartBody.getContentType())
                 .POST(HttpRequest.BodyPublishers.ofByteArray(multipartBody.getBody()))
                 .build();
@@ -70,14 +84,27 @@ public class ImageHttpRequestSender {
         }
     }
 
-    private static class DirectoryCreatingException extends RuntimeException {
-        public DirectoryCreatingException(String message, Exception e) {
+    @PreDestroy
+    public void removeDirectory() {
+        Path path = Paths.get("temp");
+        try (Stream<Path> deletedFiles = Files.walk(path)) {
+            deletedFiles
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+        } catch (IOException e) {
+            throw new RemoveDirectoryException("Failed to delete directory " + path, e);
+        }
+    }
+
+    private static class CreateDirectoryException extends RuntimeException {
+        public CreateDirectoryException(String message, Exception e) {
             super(message, e);
         }
     }
 
-    private static class ImageSavingException extends RuntimeException {
-        ImageSavingException(String message, Exception e) {
+    private static class SaveImageException extends RuntimeException {
+        SaveImageException(String message, Exception e) {
             super(message, e);
         }
     }
@@ -90,6 +117,12 @@ public class ImageHttpRequestSender {
 
     private static class ResponseReturnException extends RuntimeException {
         public ResponseReturnException(String message, Exception e) {
+            super(message, e);
+        }
+    }
+
+    private static class RemoveDirectoryException extends RuntimeException {
+        public RemoveDirectoryException(String message, Exception e) {
             super(message, e);
         }
     }

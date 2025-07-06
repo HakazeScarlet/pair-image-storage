@@ -13,7 +13,7 @@ import java.util.List;
 
 public class HttpRequestMultipartBody {
 
-    private byte[] bytes;
+    private final byte[] bytes;
     private String boundary;
 
     private HttpRequestMultipartBody(byte[] bytes, String boundary) {
@@ -38,13 +38,17 @@ public class HttpRequestMultipartBody {
     }
 
     public static class Builder {
-        private List<MultiPartRecord> parts;
+
+        private static final byte[] APP_OCTET_STREAM_HEADER_BYTES = ("Content-Type: application/octet-stream\r\n\r\n")
+            .getBytes(StandardCharsets.UTF_8);
+        private final List<MultiPartRecord> parts;
 
         public Builder() {
             this.parts = new ArrayList<>();
         }
 
         public static class MultiPartRecord {
+
             private String fieldName;
             private String filename;
             private String contentType;
@@ -81,7 +85,6 @@ public class HttpRequestMultipartBody {
             public void setContent(Object content) {
                 this.content = content;
             }
-
         }
 
         public Builder addPart(String fieldName, Object fieldValue, String contentType, String fileName) {
@@ -105,15 +108,14 @@ public class HttpRequestMultipartBody {
                 if (record.getFilename() != null) {
                     stringBuilder.append("\"; filename=\"" + record.getFilename());
                 }
+
                 out.write(stringBuilder.toString().getBytes(StandardCharsets.UTF_8));
                 out.write(("\"\r\n").getBytes(StandardCharsets.UTF_8));
                 Object content = record.getContent();
-
+                out.write(APP_OCTET_STREAM_HEADER_BYTES);
                 if (content instanceof File) {
-                    out.write(("Content-Type: application/octet-stream\r\n\r\n").getBytes(StandardCharsets.UTF_8));
                     Files.copy(((File) content).toPath(), out);
                 } else {
-                    out.write(("Content-Type: application/octet-stream\r\n\r\n").getBytes(StandardCharsets.UTF_8));
                     ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
                     objectOutputStream.writeObject(content);
                     objectOutputStream.flush();
@@ -122,8 +124,7 @@ public class HttpRequestMultipartBody {
             }
             out.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
 
-            HttpRequestMultipartBody httpRequestMultipartBody = new HttpRequestMultipartBody(out.toByteArray(), boundary);
-            return httpRequestMultipartBody;
+            return new HttpRequestMultipartBody(out.toByteArray(), boundary);
         }
 
     }
